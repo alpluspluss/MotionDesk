@@ -1,6 +1,6 @@
 cask "motiondesk" do
-  version "0.2.1"
-  sha256 "787cf064ac755ca8b86858aafe54580dc3348d94634487939e76fed61b8f52a8"
+  version "0.1.0"
+  sha256 "6587bcf9700b895759d43c83d18933e89c20d51d61b57f2eace722caa16d7b5a"
 
   url "https://github.com/alpluspluss/MotionDesk/releases/download/v#{version}/MotionDesk-v#{version}.dmg"
   name "MotionDesk"
