@@ -64,12 +64,12 @@ jobs:
           DMG_SHA256=$(shasum -a 256 MotionDesk-${{ github.ref_name }}.dmg | cut -d' ' -f1)
           VERSION=$(echo ${{ github.ref_name }} | sed 's/^v//')
           
-          sed -i '' "s/version \".*\"/version \"$VERSION\"/" Formula/motiondesk.rb
-          sed -i '' "s/sha256 \".*\"/sha256 \"$DMG_SHA256\"/" Formula/motiondesk.rb
+          sed -i '' "s/version \".*\"/version \"$VERSION\"/" Casks/motiondesk.rb
+          sed -i '' "s/sha256 \".*\"/sha256 \"$DMG_SHA256\"/" Casks/motiondesk.rb
           
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add formula/motiondesk.rb
+          git add Casks/motiondesk.rb
           git commit -m "pkg: update cask to ${{ github.ref_name }}" || exit 0
           git push origin HEAD:main
 

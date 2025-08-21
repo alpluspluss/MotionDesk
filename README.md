@@ -24,7 +24,7 @@ if they want to, e.g. write graphics interfaces for better user ergonomics.
 ### Homebrew
 
 ```shell
-brew tap alpluspluss/motiondesk
+brew tap alpluspluss/motiondesk https://github.com/alpluspluss/MotionDesk
 brew instsall --cask motiondesk
 ```
 
