@@ -38,7 +38,7 @@ jobs:
       - name: Build
         run: cmake --build build/release --target MotionDesk
 
-      - name: Adhoc ode sign app
+      - name: Adhoc code sign app
         run: |
           codesign --deep --force --sign - build/release/MotionDesk.app
 
@@ -55,7 +55,6 @@ jobs:
             --icon "MotionDesk.app" 150 200 \
             --hide-extension "MotionDesk.app" \
             --app-drop-link 450 200 \
-            --overwrite \
             "MotionDesk-${{ github.ref_name }}.dmg" \
             dmg-staging/
 
