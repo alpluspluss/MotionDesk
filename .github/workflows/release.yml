@@ -1,0 +1,84 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Set up Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Install dependencies
+        run: |
+          brew install cmake ninja llvm create-dmg
+
+      - name: Configure CMake
+        run: |
+          cmake -B build/release \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_COMPILER=/opt/homebrew/opt/llvm/bin/clang \
+            -DCMAKE_CXX_COMPILER=/opt/homebrew/opt/llvm/bin/clang++ \
+            -G Ninja
+
+      - name: Build
+        run: cmake --build build/release --target MotionDesk
+
+      - name: Create DMG
+        run: |
+          mkdir dmg-staging
+          cp -R build/release/MotionDesk.app dmg-staging/
+          
+          create-dmg \
+            --volname "MotionDesk" \
+            --window-pos 200 120 \
+            --window-size 600 400 \
+            --icon-size 100 \
+            --icon "MotionDesk.app" 150 200 \
+            --hide-extension "MotionDesk.app" \
+            --app-drop-link 450 200 \
+            "MotionDesk-${{ github.ref_name }}.dmg" \
+            dmg-staging/
+
+      - name: Calculate checksums
+        run: |
+          shasum -a 256 MotionDesk-${{ github.ref_name }}.dmg > checksums.txt
+          cat checksums.txt
+
+      - name: Update Homebrew cask
+        run: |
+          DMG_SHA256=$(shasum -a 256 MotionDesk-${{ github.ref_name }}.dmg | cut -d' ' -f1)
+          VERSION=$(echo ${{ github.ref_name }} | sed 's/^v//')
+          
+          sed -i '' "s/version \".*\"/version \"$VERSION\"/" Formula/motiondesk.rb
+          sed -i '' "s/sha256 \".*\"/sha256 \"$DMG_SHA256\"/" Formula/motiondesk.rb
+          
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add formula/motiondesk.rb
+          git commit -m "pkg: update cask to ${{ github.ref_name }}" || exit 0
+          git push origin HEAD:main
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            MotionDesk-${{ github.ref_name }}.dmg
+            checksums.txt
+          body: |
+            **SHA256 Checksum** : `$(cat checksums.txt)`
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
